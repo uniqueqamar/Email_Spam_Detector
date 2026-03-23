@@ -3,9 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
-import urllib.request
-import io
-import zipfile
 import streamlit as st
 
 from sklearn.model_selection import train_test_split
@@ -37,7 +34,6 @@ st.markdown("""
     }
     .header-box h1 { color: #a29bfe; margin: 0; font-size: 32px; }
     .header-box p  { color: #aaa; margin: 6px 0 0; font-size: 14px; }
-
     .result-spam {
         background: #2d0a0a;
         border: 2px solid #ff4757;
@@ -59,7 +55,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ── Styling for plots (same as your original) ────────────────
+# ── Plot styling ─────────────────────────────────────────────
 plt.rcParams.update({
     'figure.facecolor': '#0f0f1a',
     'axes.facecolor':   '#1a1a2e',
@@ -78,56 +74,15 @@ HAM_COLOR  = '#2ed573'
 ACCENT     = '#a29bfe'
 
 
-# ── Load Data (cached so it doesn't reload on every interaction) ──
-@st.cache_data   
-# this decorator is important — without it, every time the user
-# clicks a button, Streamlit reruns the whole file from top to
-# bottom, redownloading the dataset each time. @st.cache_data
-# saves the result after first run and reuses it.
+# ── Step 1: Define functions ─────────────────────────────────
+# functions must be defined BEFORE they are called
+
+@st.cache_data
 def load_data():
-    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00228/smsspamcollection.zip"
-    try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            zip_data = io.BytesIO(response.read())
-        with zipfile.ZipFile(zip_data) as z:
-            with z.open('SMSSpamCollection') as f:
-                df = pd.read_csv(f, sep='\t', header=None, names=['label', 'text'])
-        return df, "UCI repository"
-    except Exception:
-        spam_samples = [
-            "WINNER!! You have been selected for a $1,000 prize. Call now to claim!",
-            "FREE entry to our weekly competition! Text WIN to 80086 now!",
-            "Congratulations! You've won a luxury car. Confirm your details immediately.",
-            "URGENT: Your account has been compromised. Click here to verify now.",
-            "You have been pre-approved for a loan of $5000. No credit check needed!",
-            "Hot singles in your area want to meet YOU tonight! Click here.",
-            "Earn $500/day working from home! No experience needed. Sign up free.",
-            "Your mobile number has won a £2000 prize. Call 09061743810 now!",
-            "SIX chances to win CASH! From £100 to £20,000 txt> CSH11 Send to 87575",
-            "Claim your FREE ringtone now! Just text MUSIC to 85069.",
-        ] * 8
-        ham_samples = [
-            "Hey, are you coming to the meeting tomorrow?",
-            "Can you pick up some groceries on the way home?",
-            "Happy birthday! Hope you have a wonderful day.",
-            "I'll be there in 10 minutes. Just finishing up.",
-            "Did you watch the game last night? Incredible ending!",
-            "Can we reschedule our call to 3pm instead?",
-            "Thanks for dinner, it was really lovely!",
-            "The report is due Friday. Let me know if you need help.",
-            "Mom called, she wants you to ring her back tonight.",
-            "I left my umbrella at your place, can I grab it tomorrow?",
-        ] * 8
-        texts  = spam_samples + ham_samples
-        labels = ['spam'] * len(spam_samples) + ['ham'] * len(ham_samples)
-        return pd.DataFrame({'label': labels, 'text': texts}), "built-in sample"
+    df = pd.read_csv("SMSSpamCollection", sep='\t', header=None, names=['label', 'text'])
+    return df, "local file"
 
-
-@st.cache_resource   
-# @st.cache_resource is for objects like trained models and
-# vectorizers that are expensive to create. Unlike cache_data
-# (which caches plain data), cache_resource keeps the actual
-# Python object in memory and shares it across all users.
+@st.cache_resource
 def train_model(df):
     df['label_num'] = df['label'].map({'spam': 1, 'ham': 0})
     X_train, X_test, y_train, y_test = train_test_split(
@@ -144,9 +99,9 @@ def train_model(df):
     model = MultinomialNB(alpha=0.1)
     model.fit(X_train_tfidf, y_train)
 
-    y_pred       = model.predict(X_test_tfidf)
-    y_prob       = model.predict_proba(X_test_tfidf)[:, 1]
-    fpr, tpr, _  = roc_curve(y_test, y_prob)
+    y_pred      = model.predict(X_test_tfidf)
+    y_prob      = model.predict_proba(X_test_tfidf)[:, 1]
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
 
     metrics = {
         'accuracy':  accuracy_score(y_test, y_pred),
@@ -161,16 +116,27 @@ def train_model(df):
     return model, vectorizer, metrics
 
 
-# ════════════════════════════════════════════════════════════
-#  LOAD + TRAIN (runs once, cached after that)
-# ════════════════════════════════════════════════════════════
+# ── Step 2: Call functions ───────────────────────────────────
+# now that functions are defined above, we can call them here
+
 df, source = load_data()
 model, vectorizer, metrics = train_model(df)
 
 
-# ════════════════════════════════════════════════════════════
-#  UI — HEADER
-# ════════════════════════════════════════════════════════════
+# ── Step 3: Sidebar ──────────────────────────────────────────
+# sidebar code comes AFTER load_data() so df and source exist
+
+st.sidebar.header("Quick Test Messages")
+st.sidebar.write("Click any to auto-fill the checker above")
+st.sidebar.markdown("---")
+st.sidebar.caption("Dataset stats")
+st.sidebar.write(f"Dataset source: {source}")
+st.sidebar.write(f"Total messages: {len(df)}")
+st.sidebar.write(f"Spam: {(df['label']=='spam').sum()}")
+st.sidebar.write(f"Ham:  {(df['label']=='ham').sum()}")
+
+
+# ── Step 4: Header ───────────────────────────────────────────
 st.markdown(f"""
     <div class="header-box">
         <h1>📧 Email Spam Detector</h1>
@@ -179,21 +145,18 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
-# ── Metric cards row ─────────────────────────────────────────
+# ── Step 5: Metric cards ─────────────────────────────────────
 c1, c2, c3, c4, c5 = st.columns(5)
-# st.metric() creates a clean stat card with a label and value
 c1.metric("Accuracy",  f"{metrics['accuracy']*100:.1f}%")
 c2.metric("Precision", f"{metrics['precision']*100:.1f}%")
 c3.metric("Recall",    f"{metrics['recall']*100:.1f}%")
 c4.metric("F1 Score",  f"{metrics['f1']*100:.1f}%")
 c5.metric("ROC AUC",   f"{metrics['roc_auc']:.3f}")
 
-st.markdown("---")   # horizontal divider line
+st.markdown("---")
 
 
-# ════════════════════════════════════════════════════════════
-#  UI — LIVE SPAM CHECKER (the main feature)
-# ════════════════════════════════════════════════════════════
+# ── Step 6: Live spam checker ────────────────────────────────
 st.subheader("Try it — check any message")
 
 user_input = st.text_area(
@@ -201,20 +164,14 @@ user_input = st.text_area(
     placeholder="e.g. Congratulations! You've won a free iPhone. Click here now!",
     height=100
 )
-# st.text_area() is like st.text_input() but for longer text.
-# placeholder shows grey hint text when the box is empty.
 
 if st.button("Check Message"):
     if user_input.strip() == "":
         st.warning("Please enter a message first.")
-        # st.warning() shows a yellow warning box
     else:
         vec  = vectorizer.transform([user_input])
         pred = model.predict(vec)[0]
         prob = model.predict_proba(vec)[0][1]
-        # prob is the probability of being spam (0.0 to 1.0)
-        # model.predict_proba returns [[ham_prob, spam_prob]]
-        # so [0][1] gives us the spam probability for the first message
 
         if pred == 1:
             st.markdown(f"""
@@ -234,9 +191,7 @@ if st.button("Check Message"):
 st.markdown("---")
 
 
-# ════════════════════════════════════════════════════════════
-#  UI — PLOTS (your original 6 charts, now inside the app)
-# ════════════════════════════════════════════════════════════
+# ── Step 7: Charts ───────────────────────────────────────────
 st.subheader("Model Evaluation Charts")
 
 fig = plt.figure(figsize=(18, 14), facecolor='#0f0f1a')
@@ -247,7 +202,7 @@ fig.suptitle(
 
 gs = gridspec.GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.35)
 
-# ── Plot 1: Metrics Bar ──────────────────────────────────────
+# Plot 1: Metrics Bar
 ax1 = fig.add_subplot(gs[0, 0])
 metric_names = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
 values  = [metrics['accuracy'], metrics['precision'],
@@ -265,7 +220,7 @@ ax1.set_ylabel('Score (%)')
 ax1.tick_params(axis='x', labelsize=9)
 ax1.grid(axis='y', zorder=0)
 
-# ── Plot 2: Confusion Matrix ─────────────────────────────────
+# Plot 2: Confusion Matrix
 ax2 = fig.add_subplot(gs[0, 1])
 sns.heatmap(metrics['cm'], annot=True, fmt='d', ax=ax2,
             cmap=sns.color_palette("Blues", as_cmap=True),
@@ -276,7 +231,7 @@ ax2.set_title('Confusion Matrix', fontsize=14, fontweight='bold', pad=12)
 ax2.set_xlabel('Predicted')
 ax2.set_ylabel('Actual')
 
-# ── Plot 3: ROC Curve ────────────────────────────────────────
+# Plot 3: ROC Curve
 ax3 = fig.add_subplot(gs[0, 2])
 ax3.plot(metrics['fpr'], metrics['tpr'], color=ACCENT, lw=2.5,
          label=f"ROC Curve (AUC = {metrics['roc_auc']:.3f})")
@@ -290,7 +245,7 @@ ax3.set_ylabel('True Positive Rate')
 ax3.legend(loc='lower right', fontsize=9, framealpha=0.2)
 ax3.grid(True)
 
-# ── Plot 4: Top Spam Words ───────────────────────────────────
+# Plot 4: Top Spam Words
 ax4 = fig.add_subplot(gs[1, 0])
 feature_names  = vectorizer.get_feature_names_out()
 spam_log_probs = model.feature_log_prob_[1]
@@ -306,7 +261,7 @@ ax4.set_title('Top Spam Words', fontsize=14, fontweight='bold', pad=12)
 ax4.set_xlabel('Relative Importance')
 ax4.grid(axis='x')
 
-# ── Plot 5: Top Ham Words ────────────────────────────────────
+# Plot 5: Top Ham Words
 ax5 = fig.add_subplot(gs[1, 1])
 ham_log_probs = model.feature_log_prob_[0]
 top_ham_idx   = ham_log_probs.argsort()[-15:][::-1]
@@ -321,7 +276,7 @@ ax5.set_title('Top Ham Words', fontsize=14, fontweight='bold', pad=12)
 ax5.set_xlabel('Relative Importance')
 ax5.grid(axis='x')
 
-# ── Plot 6: Class Distribution ───────────────────────────────
+# Plot 6: Class Distribution
 ax6 = fig.add_subplot(gs[1, 2])
 class_counts = df['label'].value_counts()
 ax6.pie(class_counts, labels=['Ham (Safe)', 'Spam'],
@@ -331,27 +286,3 @@ ax6.pie(class_counts, labels=['Ham (Safe)', 'Spam'],
 ax6.set_title('Class Distribution', fontsize=14, fontweight='bold', pad=12)
 
 st.pyplot(fig)
-# st.pyplot(fig) displays the entire matplotlib figure inside
-# the app — replaces plt.show() and plt.savefig()
-
-
-# ════════════════════════════════════════════════════════════
-#  UI — SIDEBAR: batch test messages
-# ════════════════════════════════════════════════════════════
-st.sidebar.header("Quick Test Messages")
-st.sidebar.write("Click any to auto-fill the checker above")
-
-# these are your original test messages from the bonus section
-sample_msgs = [
-    "Congratulations! You've won a free iPhone. Click here now!",
-    "Hey, are we still meeting for coffee tomorrow at 10?",
-    "URGENT: Your bank account has been compromised. Verify immediately.",
-    "Can you review the report and send me your feedback?",
-    "FREE offer! Get 50% off all items today only. Limited time!",
-]
-
-st.sidebar.markdown("---")
-st.sidebar.caption("Dataset stats")
-st.sidebar.write(f"Total messages: {len(df)}")
-st.sidebar.write(f"Spam: {(df['label']=='spam').sum()}")
-st.sidebar.write(f"Ham:  {(df['label']=='ham').sum()}")
