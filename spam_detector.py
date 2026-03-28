@@ -278,6 +278,8 @@ ax5.set_xlabel('Relative Importance')
 ax5.grid(axis='x')
 
 # Plot 6: Class Distribution
+if 'label_num' not in df.columns:
+    df['label_num'] = df['label'].map({'ham': 0, 'spam': 1})
 class_counts = df['label_num'].value_counts()
 
 labels = []
