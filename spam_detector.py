@@ -284,6 +284,7 @@ class_counts = df['label_num'].value_counts()
 
 labels = []
 values = []
+fig, ax6 = plt.subplots()
 
 if 0 in class_counts:
     labels.append('Ham (Safe)')
