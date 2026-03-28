@@ -281,7 +281,7 @@ ax5.grid(axis='x')
 # Plot 6: Class Distribution (Pie Chart)
 ax6 = fig.add_subplot(gs[1, 2])
 
-class_counts = df['label_num'].value_counts()
+class_counts = df['label'].value_counts()
 
 labels = []
 values = []
