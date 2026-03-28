@@ -4,6 +4,9 @@ An end-to-end **NLP-based machine learning application** that classifies message
 
 ---
 
+##Live link
+https://emailspamdetector-x2l8ed75k8qb7bscgntfxf.streamlit.app/
+
 ## 🚀 Demo Preview
 
 ![App Preview](spam_app1.png)
