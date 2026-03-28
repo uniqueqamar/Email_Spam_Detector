@@ -306,6 +306,5 @@ else:
     ax6.text(0.5, 0.5, "No data", ha='center', va='center')
     ax6.axis('off')
 
-)
 
 st.pyplot(fig)
