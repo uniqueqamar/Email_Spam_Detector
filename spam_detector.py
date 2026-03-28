@@ -85,6 +85,7 @@ def load_data():
 @st.cache_resource
 def train_model(df):
     df['label_num'] = df['label'].map({'spam': 1, 'ham': 0})
+    df = df.dropna(subset=['text', 'label_num'])
     X_train, X_test, y_train, y_test = train_test_split(
         df['text'], df['label_num'],
         test_size=0.2, random_state=42,
