@@ -277,6 +277,34 @@ ax5.set_title('Top Ham Words', fontsize=14, fontweight='bold', pad=12)
 ax5.set_xlabel('Relative Importance')
 ax5.grid(axis='x')
 
+# Plot 6: Class Distribution (Pie Chart)
+ax6 = fig.add_subplot(gs[1, 2])
+
+class_counts = df['label_num'].value_counts()
+
+labels = []
+values = []
+
+if 0 in class_counts:
+    labels.append('Ham (Safe)')
+    values.append(class_counts[0])
+
+if 1 in class_counts:
+    labels.append('Spam')
+    values.append(class_counts[1])
+
+if len(values) > 0:
+    ax6.pie(
+        values,
+        labels=labels,
+        autopct='%1.1f%%',
+        startangle=90,
+        colors=[HAM_COLOR, SPAM_COLOR][:len(values)]
+    )
+    ax6.set_title('Class Distribution', fontsize=14, fontweight='bold', pad=12)
+else:
+    ax6.text(0.5, 0.5, "No data", ha='center', va='center')
+    ax6.axis('off')
 
 )
 
