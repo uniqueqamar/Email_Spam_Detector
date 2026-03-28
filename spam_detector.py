@@ -278,12 +278,24 @@ ax5.set_xlabel('Relative Importance')
 ax5.grid(axis='x')
 
 # Plot 6: Class Distribution
-ax6 = fig.add_subplot(gs[1, 2])
-class_counts = df['label'].value_counts()
-ax6.pie(class_counts, labels=['Ham (Safe)', 'Spam'],
-        colors=[HAM_COLOR, SPAM_COLOR], autopct='%1.1f%%',
-        startangle=90, wedgeprops={'linewidth':3,'edgecolor':'#0f0f1a'},
-        textprops={'color':'white','fontsize':11})
-ax6.set_title('Class Distribution', fontsize=14, fontweight='bold', pad=12)
+class_counts = df['label_num'].value_counts()
+
+labels = []
+values = []
+
+if 0 in class_counts:
+    labels.append('Ham (Safe)')
+    values.append(class_counts[0])
+
+if 1 in class_counts:
+    labels.append('Spam')
+    values.append(class_counts[1])
+
+ax6.pie(
+    values,
+    labels=labels,
+    autopct='%1.1f%%',
+    startangle=90
+)
 
 st.pyplot(fig)
