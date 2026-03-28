@@ -277,28 +277,7 @@ ax5.set_title('Top Ham Words', fontsize=14, fontweight='bold', pad=12)
 ax5.set_xlabel('Relative Importance')
 ax5.grid(axis='x')
 
-# Plot 6: Class Distribution
-if 'label_num' not in df.columns:
-    df['label_num'] = df['label'].map({'ham': 0, 'spam': 1})
-class_counts = df['label_num'].value_counts()
 
-labels = []
-values = []
-fig, ax6 = plt.subplots()
-
-if 0 in class_counts:
-    labels.append('Ham (Safe)')
-    values.append(class_counts[0])
-
-if 1 in class_counts:
-    labels.append('Spam')
-    values.append(class_counts[1])
-
-ax6.pie(
-    values,
-    labels=labels,
-    autopct='%1.1f%%',
-    startangle=90
 )
 
 st.pyplot(fig)
