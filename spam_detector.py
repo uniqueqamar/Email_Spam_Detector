@@ -81,6 +81,7 @@ ACCENT     = '#a29bfe'
 def load_data():
     df = pd.read_csv("SMSSpamCollection", sep='\t', header=None, names=['label', 'text'])
     return df, "local file"
+    df['label_num'] = df['label'].map({'ham': 0, 'spam': 1})
 
 @st.cache_resource
 def train_model(df):
