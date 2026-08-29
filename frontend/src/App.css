@@ -1,142 +1,243 @@
-* {
-  box-sizing: border-box;
-}
+/* ---- Reset / override Vite's default template globals ----
+   The scaffolded index.css sets #root text-align:center, a fixed width,
+   large h1/h2 sizes, and CSS-variable-based colors. We override anything
+   that would conflict, scoped where possible, at higher specificity. */
 
-body {
-  margin: 0;
-  background-color: #0f0f1a;
-  color: #e0e0e0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+#root {
+  width: 100% !important;
+  max-width: none !important;
+  border-inline: none !important;
+  text-align: left !important;
+  display: block !important;
+  min-height: 100vh;
 }
 
 .app {
-  max-width: 800px;
+  min-height: 100vh;
+  background: #0a0b0f;
+  color: #d4d4d8;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  padding: 4rem 1.5rem;
+}
+
+.shell {
+  max-width: 720px;
   margin: 0 auto;
-  padding: 2rem 1rem;
 }
 
-.header-box {
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  border: 1px solid #a29bfe;
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
-  margin-bottom: 1.5rem;
+/* ---- Header ---- */
+
+.header {
+  margin-bottom: 2.5rem;
 }
 
-.header-box h1 {
-  color: #a29bfe;
-  margin: 0;
-  font-size: 28px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.75rem;
 }
 
-.header-box p {
-  color: #aaa;
-  margin: 6px 0 0;
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #818cf8;
+  flex-shrink: 0;
+}
+
+.kicker {
+  margin: 0 0 2px !important;
+  font-size: 12px !important;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+.app h1 {
+  margin: 0 !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  color: #fafafa !important;
+  line-height: 1.2 !important;
+}
+
+.subtitle {
+  margin: 0 !important;
   font-size: 14px;
+  color: #71717a;
 }
+
+/* ---- Metrics ---- */
 
 .metrics-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .metric-card {
-  background: #1a1a2e;
-  border: 1px solid #2a2a3e;
-  border-radius: 10px;
-  padding: 0.9rem 0.5rem;
+  background: #101116;
+  border: 1px solid #1f2027;
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
   text-align: center;
 }
 
 .metric-value {
   display: block;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #a29bfe;
+  color: #e4e4e7;
+  letter-spacing: -0.01em;
 }
 
 .metric-label {
   display: block;
-  font-size: 0.75rem;
-  color: #888;
-  margin-top: 0.25rem;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b6b75;
+  margin-top: 0.35rem;
 }
 
-.checker h2 {
-  font-size: 1.2rem;
+/* ---- Panel ---- */
+
+.panel {
+  background: #101116;
+  border: 1px solid #1f2027;
+  border-radius: 16px;
+  padding: 1.75rem;
+}
+
+.app h2 {
+  margin: 0 0 4px !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  color: #fafafa !important;
+  letter-spacing: -0.01em !important;
+}
+
+.panel-hint {
+  margin: 0 0 1.1rem !important;
+  font-size: 13px;
+  color: #71717a;
 }
 
 textarea {
   width: 100%;
-  background: #1a1a2e;
-  border: 1px solid #2a2a3e;
+  background: #0a0b0f;
+  border: 1px solid #26272f;
   border-radius: 10px;
-  color: #e0e0e0;
-  padding: 0.75rem;
-  font-size: 0.95rem;
+  color: #e4e4e7;
+  padding: 0.85rem;
+  font-size: 14px;
   font-family: inherit;
+  line-height: 1.5;
   resize: vertical;
+  transition: border-color 0.15s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+textarea::placeholder {
+  color: #52525b;
+}
+
+.panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.9rem;
 }
 
 button {
-  margin-top: 0.75rem;
-  background: #a29bfe;
-  color: #0f0f1a;
+  background: #6366f1;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
-  padding: 0.6rem 1.4rem;
-  font-weight: 700;
+  padding: 0.6rem 1.3rem;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  background: #5457e5;
 }
 
 button:disabled {
-  opacity: 0.6;
+  background: #2c2d35;
+  color: #6b6b75;
   cursor: not-allowed;
 }
 
 .error {
-  color: #ff6b81;
-  margin-top: 0.75rem;
+  margin: 0.9rem 0 0 !important;
+  font-size: 13px;
+  color: #f87171;
 }
 
-.result-spam,
-.result-ham {
+/* ---- Result ---- */
+
+.result {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
   margin-top: 1.25rem;
-  border-radius: 12px;
-  padding: 1.5rem;
-  text-align: center;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border-left: 3px solid transparent;
 }
 
 .result-spam {
-  background: #2d0a0a;
-  border: 2px solid #ff4757;
+  background: rgba(244, 63, 94, 0.07);
+  border-left-color: #f43f5e;
+  color: #fda4af;
 }
 
 .result-ham {
-  background: #0a2d0a;
-  border: 2px solid #2ed573;
+  background: rgba(16, 185, 129, 0.07);
+  border-left-color: #10b981;
+  color: #6ee7b7;
 }
 
-.result-spam h2 {
-  color: #ff4757;
-  font-size: 32px;
-  margin: 0;
+.result-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
-.result-ham h2 {
-  color: #2ed573;
-  font-size: 32px;
-  margin: 0;
+.result-spam .result-icon { color: #f43f5e; }
+.result-ham .result-icon { color: #10b981; }
+
+.result-label {
+  margin: 0 !important;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fafafa !important;
 }
 
-.result-spam p {
-  color: #ff6b81;
-  margin: 6px 0 0;
+.result-detail {
+  margin: 2px 0 0 !important;
+  font-size: 13px;
+  color: #a1a1aa !important;
 }
 
-.result-ham p {
-  color: #7bed9f;
-  margin: 6px 0 0;
+/* ---- Responsive ---- */
+
+@media (max-width: 640px) {
+  .app { padding: 2rem 1rem; }
+  .metrics-row { grid-template-columns: repeat(2, 1fr); }
 }
