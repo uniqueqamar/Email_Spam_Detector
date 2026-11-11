@@ -9,6 +9,7 @@ Requires: model.joblib, vectorizer.joblib, metrics.json (from train_model.py)
 """
 
 import json
+from pathlib import Path
 import joblib
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,10 +26,12 @@ app.add_middleware(
 )
 
 # --- Load the trained model once, at startup ---
+# Resolve artifacts relative to this module, not the process working directory.
+ARTIFACT_DIR = Path(__file__).resolve().parent
 try:
-    model = joblib.load("model.joblib")
-    vectorizer = joblib.load("vectorizer.joblib")
-    with open("metrics.json") as f:
+    model = joblib.load(ARTIFACT_DIR / "model.joblib")
+    vectorizer = joblib.load(ARTIFACT_DIR / "vectorizer.joblib")
+    with open(ARTIFACT_DIR / "metrics.json") as f:
         METRICS = json.load(f)
 except FileNotFoundError:
     model = None
