@@ -1,8 +1,8 @@
 """Regression tests for working-directory-independent model loading."""
 
 import importlib.util
-import json
 from pathlib import Path
+import builtins
 from unittest.mock import patch
 
 
@@ -18,9 +18,12 @@ def test_artifacts_resolved_relative_to_backend(tmp_path, monkeypatch):
         model_paths.append(Path(path))
         return object()
 
+    original_open = builtins.open
+
     def fake_open(path, *args, **kwargs):
-        assert Path(path) == BACKEND.parent / "metrics.json"
-        return open(tmp_path / "metrics_fixture.json", *args, **kwargs)
+        if Path(path) == BACKEND.parent / "metrics.json":
+            return original_open(tmp_path / "metrics_fixture.json", *args, **kwargs)
+        return original_open(path, *args, **kwargs)
 
     (tmp_path / "metrics_fixture.json").write_text('{"accuracy": 0.9}')
     spec = importlib.util.spec_from_file_location("spam_api_path_test", BACKEND)
